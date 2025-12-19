@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Dynamics Model for Deformable Object Manipulation">
+    <meta name="keywords" content="Deformable Object Simulation">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MPM-PhysTwin</title>
+
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-FV4ZJ9PVSV');
+  </script>
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" 
+            href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV4ZJ9PVSV"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-FV4ZJ9PVSV');
+    </script>
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+</head>
+
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-fullhd">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <h1 class="title is-1 publication-title">
+                            Dynamics Model for Deformable Object Manipulation
+                        </h1>
+
+                        <div class="is-size-0.7 publication-authors">
+                            <span class="author-block">
+                                <a target="_blank" href="https://rocktimjyotidas.github.io/">Rocktim Jyoti Das</a>,
+                            </span>
+
+                        </div>
+
+                        <div class="is-size-8 publication-authors">
+                            <span class="author-block">
+                                University of Maryland, College Park, MD, USA
+                            </span>
+                        </div>
+
+                        <div class="column has-text-centered">
+                            <div class="publication-links">
+                                <span class="link-block">
+                                    <a target="_blank" href="https://drive.google.com/file/d/1SvNu2KFWAdn0lE_APjA9Bx34kSyjdIyq/view?usp=sharing"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fas fa-file"></i>
+                                        </span>
+                                        <span>Presentation</span>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Abstract Section -->
+<section class="section">
+    <div class="container is-fluid">
+        <div class="content">
+            <h2 class="title is-3">Motivation</h2>
+
+            <p>
+            Robotic manipulation and interaction with deformable objects require models that go beyond
+            static geometry or purely visual reconstruction. While recent methods can reconstruct
+            high-fidelity 3D shape and appearance from RGB-D data, they often lack physically grounded
+            dynamics, limiting their ability to predict future states, reason about forces, or generalize
+            to unseen interactions. A true physical digital twin should capture not only how an object
+            looks, but also how it moves, deforms, and responds to contact under external actions.
+            </p>
+
+            <p>
+            To address this, we aim to infer material parameters directly from real-world observations,
+            enabling simulations that faithfully reproduce observed object motion and can be reused for
+            downstream tasks such as planning, simulation, and interaction.
+            </p>
+        </div>
+    </div>
+</section>
+
+
+<section class="section" id="related-work">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">Related Work</h2>
+
+      <p>
+        Spring–mass models are widely used for deformable object simulation due to their simplicity
+        and efficiency. Recent works (e.g., PhysTwin) successfully integrate spring–mass dynamics
+        with optimization-based inverse modeling to reconstruct deformable objects from sparse video
+        observations. However, spring–mass systems rely on fixed connectivity and local linear
+        assumptions, making them less suitable for large deformations, bending-dominated motion, or
+        topology-changing phenomena.
+      </p>
+
+      <p>
+        Continuum mechanics–based methods such as FEM and MPM offer stronger physical grounding but
+        have traditionally been difficult to integrate with perception pipelines and differentiable
+        optimization. Recent advances in differentiable simulation frameworks (e.g., Warp) enable
+        backpropagation through complex physics solvers, opening the door to physically grounded
+        inverse modeling driven by real data.
+      </p>
+
+      <!-- Qualitative examples -->
+      <h3 class="title is-4 mt-5">Qualitative Examples from Prior Work</h3>
+
+      <div class="columns is-multiline">
+        <!-- Red sweater -->
+        <div class="column is-12-tablet is-4-desktop">
+          <div class="box">
+            <p class="has-text-weight-semibold mb-2">
+              Picking up a red sweater
+            </p>
+            <video controls playsinline preload="metadata"
+                   style="width:100%; border-radius:12px;">
+              <source src="./media/videos/red_cloth.webm" type="video/webm">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+
+        <!-- Zebra -->
+        <div class="column is-12-tablet is-4-desktop">
+          <div class="box">
+            <p class="has-text-weight-semibold mb-2">
+              Two-point manipulation of a soft zebra
+            </p>
+            <video controls playsinline preload="metadata"
+                   style="width:100%; border-radius:12px;">
+              <source src="./media/videos/pick_zebra.webm" type="video/webm">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+
+        <!-- Rope -->
+        <div class="column is-12-tablet is-4-desktop">
+          <div class="box">
+            <p class="has-text-weight-semibold mb-2">
+              Pushing and picking a rope at the center
+            </p>
+            <video controls playsinline preload="metadata"
+                   style="width:100%; border-radius:12px;">
+              <source src="./media/videos/pushing_rope.webm" type="video/webm">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-4">
+        These examples highlight the strengths of existing approaches in handling real-world
+        deformable object interactions, while also exposing limitations of spring–mass formulations
+        under large deformation and complex contact—motivating the need for continuum-based,
+        differentiable dynamics.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="section">
+    <div class="container is-fluid">
+        <div class="content">
+            <h2 class="title is-3">Proposed Idea</h2>
+
+            <p>
+            We extend the PhysTwin paradigm by replacing the spring–mass prior with a continuum-based
+            Material Point Method (MPM). The key idea is to keep the same supervision signal—tracked 3D
+            motion from RGB-D observations—while upgrading the underlying dynamics model to a physically
+            richer continuum formulation.
+            </p>
+
+            <p>
+            MPM offers three practical advantages for inverse modeling of deformable objects: it naturally
+            supports large deformations without relying on mesh connectivity, computes internal forces from
+            stress via a constitutive model, and enables optimization over physically meaningful parameters
+            such as Young’s modulus and density. Crucially, the simulator remains fully differentiable,
+            allowing gradients to flow from image- or trajectory-level losses back to material parameters.
+            </p>
+
+            <p>
+            The result is an end-to-end pipeline that estimates spatial material properties from observed
+            motion while preserving physical interpretability and generalization to novel interactions.
+            </p>
+        </div>
+    </div>
+</section>
+
+
+<section class="section" id="mpm-phystwin">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">MPM PhysTwin: Differentiable Continuum Dynamics</h2>
+
+      <!-- Particle State + Constitutive Model -->
+      <h3 class="title is-4">Particle State and Constitutive Model</h3>
+      <p>
+        We represent the object as a set of Material Point Method (MPM) particles. Each particle stores a local
+        continuum state: position <em>x<sub>p</sub></em>, velocity <em>v<sub>p</sub></em>, deformation gradient
+        <em>F<sub>p</sub></em>, affine velocity field <em>C<sub>p</sub></em>, volume <em>V<sub>p</sub></em>, and
+        density <em>&rho;<sub>p</sub></em>. This particle-based continuum representation avoids explicit mesh
+        connectivity while still supporting stress-based internal forces.
+      </p>
+
+      <p>
+        We use a compressible isotropic Neo-Hookean constitutive model that maps deformation to stress. The
+        material parameters are Young’s modulus <em>E</em> (optimized, controls stiffness), density <em>&rho;</em>
+        (optimized, controls inertia), and Poisson’s ratio <em>&nu;</em> (fixed, controls volumetric response and
+        improves numerical stability). In the simulator, parameters enter as:
+      </p>
+
+      <div class="box">
+        <p class="mb-0">
+          (<em>E</em>, <em>&nu;</em>) &rarr; (<em>&mu;</em>, <em>&lambda;</em>) &rarr; stress,
+          &nbsp;&nbsp; <em>&rho;</em> &rarr; mass and inertia
+        </p>
+      </div>
+
+      <!-- Forward MPM Simulation -->
+      <h3 class="title is-4">Forward MPM Simulation (Differentiable)</h3>
+      <p>
+        The forward dynamics are advanced using the standard Particle &rarr; Grid &rarr; Particle (P2G–Grid–G2P)
+        loop. All steps are differentiable, so predicted trajectories depend explicitly on <em>E</em> and
+        <em>&rho;</em>.
+      </p>
+
+      <h4 class="title is-5">Forward Simulation Pseudocode</h4>
+      <pre><code>Given material parameters: E, ρ   (ν fixed)
+Precompute: μ, λ = f(E, ν)
+
+for each timestep t:
+
+  # P2G: particles → grid
+  for each particle p:
+      m_p = ρ_p * V_p
+      σ_p = StressNeoHookean(F_p; μ, λ)
+      scatter m_p, m_p v_p, and stress contributions to grid nodes
+
+  # Grid solve
+  for each grid node i:
+      accumulate internal forces from stress
+      add external actions (gravity, push/gripper, collisions, BCs)
+      update grid velocity v_i using total forces and grid mass
+
+  # G2P: grid → particles
+  for each particle p:
+      v_p  = interpolate grid velocities
+      x_p += Δt * v_p
+      ∇v_p = interpolate grid velocity gradients
+      F_p  = (I + Δt ∇v_p) F_p
+      C_p  = APIC affine update</code></pre>
+
+      <!-- Supervision + Loss -->
+      <h3 class="title is-4">Supervision and Loss Function</h3>
+      <p>
+        Supervision is obtained from RGB-D videos by tracking 3D Gaussian centers, which provide sparse but reliable
+        object motion. We supervise only 3D point motion (not pixels). At each frame <em>t</em>, we compare simulated
+        particle positions <em>X<sub>t</sub><sup>sim</sup></em> to tracked Gaussian centers
+        <em>X<sub>t</sub><sup>gt</sup></em> using the Chamfer distance:
+      </p>
+
+      <div class="box">
+        <p class="mb-0">
+          L<sub>t</sub> = Chamfer( X<sub>t</sub><sup>sim</sup>, X<sub>t</sub><sup>gt</sup> )
+        </p>
+      </div>
+
+      <p>
+        Chamfer distance is appropriate because there are no explicit correspondences, tracked points can be missing
+        due to occlusion, and the metric enforces global alignment of shape and motion.
+      </p>
+
+      <!-- Backprop -->
+      <h3 class="title is-4">Differentiable Backpropagation</h3>
+      <p>
+        The loss is computed in PyTorch, and gradients with respect to simulated particle positions are injected into
+        the MPM solver. Using Warp’s automatic differentiation, gradients propagate backward through the entire MPM
+        pipeline—G2P, grid solve, P2G, stress computation, constitutive parameters (<em>&mu;</em>, <em>&lambda;</em>),
+        and finally the material parameters (<em>E</em>, <em>&rho;</em>). This enables end-to-end optimization of
+        physically meaningful material properties directly from observed motion.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="experimental-setup">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">Experimental Setup</h2>
+
+      <p>
+        We evaluate our method on deformable object interaction sequences from the PhysTwin dataset, focusing on cloth
+        and rope manipulation scenarios. For each sequence, RGB-D videos are used to extract tracked 3D Gaussian
+        centers, which provide sparse but reliable supervision of object motion. MPM particles are initialized from
+        the first frame, and the recorded external actions (e.g., pushes and gripper motion) are replayed in
+        simulation to match the real interaction conditions. We then optimize material parameters by minimizing
+        motion error over time, producing an MPM simulation that best explains the observed trajectory. All
+        experiments are executed using a differentiable MPM solver implemented in Warp.
+      </p>
+
+      <div class="box">
+        <h3 class="title is-5 mb-2">Per-sequence pipeline</h3>
+        <ol>
+          <li>Use RGB-D videos to extract tracked 3D Gaussian centers.</li>
+          <li>Initialize MPM particles from the first frame.</li>
+          <li>Replay external actions (pushes, gripper motion) in simulation.</li>
+          <li>Optimize material parameters by minimizing motion error over time.</li>
+        </ol>
+      </div>
+
+      <div class="box">
+        <h3 class="title is-5 mb-2">Implementation</h3>
+        <p class="mb-0">
+          All simulations are run using a differentiable MPM solver implemented in Warp.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="section" id="results">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">Results</h2>
+
+      <p>
+        Qualitative results show that optimized MPM simulations can closely follow real object motion under interaction.
+        Compared to unoptimized or spring–mass baselines, MPM better preserves large-scale deformation, produces smoother
+        and more realistic motion, and avoids tuning mesh connectivity or spring parameters. Visualizations overlay
+        simulated particles (<span class="has-text-weight-semibold">green</span>) with ground-truth motion
+        (<span class="has-text-weight-semibold">white</span>), demonstrating improved trajectory alignment across frames.
+      </p>
+
+      <div class="columns is-multiline">
+        <!-- Rope -->
+        <div class="column is-12-tablet is-6-desktop">
+          <div class="box">
+            <h3 class="title is-5 mb-2">Rope simulation (MPM)</h3>
+            <p class="is-size-6 mb-3">
+              Optimized continuum dynamics recover realistic rope deformation and match observed motion under contact.
+            </p>
+            <figure class="image">
+              <video controls playsinline preload="metadata" style="width:100%; border-radius:12px;">
+                <source src="./media/videos/rope_simulation.webm" type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
+            </figure>
+          </div>
+        </div>
+
+        <!-- Cloth -->
+        <div class="column is-12-tablet is-6-desktop">
+          <div class="box">
+            <h3 class="title is-5 mb-2">Cloth simulation (MPM)</h3>
+            <p class="is-size-6 mb-3">
+              MPM captures smooth, large-deformation cloth motion without hand-tuning spring connectivity.
+            </p>
+            <figure class="image">
+              <video controls playsinline preload="metadata" style="width:100%; border-radius:12px;">
+                <source src="./media/videos/cloth_simulation.webm" type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3 class="title is-5 mb-2">Key qualitative takeaways</h3>
+        <ul>
+          <li>Better preserves large-scale deformation under interaction.</li>
+          <li>Produces smoother and more realistic motion trajectories.</li>
+          <li>Avoids tuning mesh connectivity or spring parameters.</li>
+          <li>Improves alignment between simulated (green) and tracked (white) motion across frames.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="observations-future-work">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">Observations and Future Work</h2>
+
+      <!-- Observations -->
+      <h3 class="title is-4">Observations</h3>
+      <ul>
+        <li>
+          MPM provides stronger physical priors than spring–mass models, enabling more realistic
+          continuum behavior under large deformations.
+        </li>
+        <li>
+          Optimizing material parameters (<em>E</em> and <em>&rho;</em>) significantly improves
+          motion fidelity and trajectory alignment.
+        </li>
+        <li>
+          A fixed Poisson’s ratio (<em>&nu;</em>) is sufficient to obtain stable and physically
+          meaningful material inference in practice.
+        </li>
+      </ul>
+
+      <!-- Future Work -->
+      <h3 class="title is-4">Future Work</h3>
+      <ul>
+        <li>
+          Extend the framework to support plasticity, fracture, and damage models within the MPM
+          formulation.
+        </li>
+        <li>
+          Enable multi-material objects with spatially varying physical properties.
+        </li>
+        <li>
+          Incorporate additional supervision signals such as tactile sensing or force feedback.
+        </li>
+        <li>
+          Improve particle initialization and robustness under extreme deformations and contact
+          events.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="references">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">References</h2>
+      <ul>
+        <li>
+          <a href="https://github.com/Jianghanxiao/PhysTwin" target="_blank" rel="noopener">
+            PhysTwin • GitHub
+          </a>
+        </li>
+        <li>
+          <a href="https://nialltl.neocities.org/articles/mpm_guide" target="_blank" rel="noopener">
+            MPM Guide by NiallTL
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/zeshunzong/warp-mpm" target="_blank" rel="noopener">
+            warp-mpm • GitHub
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column">
+                    <div class="content has-text-centered">
+                        <p>
+                            Website template borrowed from <a href="https://github.com/nerfies/nerfies.github.io">NeRFies</a>
+                            and <a href="https://peract.github.io/">PerAct</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    
+</body>
+</html>
