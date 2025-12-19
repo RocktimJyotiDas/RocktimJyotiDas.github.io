@@ -195,33 +195,52 @@
 
 
 
-<section class="section">
-    <div class="container is-fluid">
-        <div class="content">
-            <h2 class="title is-3">Proposed Idea</h2>
+<section class="section" id="proposed-idea">
+  <div class="container is-fluid">
+    <div class="content">
+      <h2 class="title is-3">Proposed Idea</h2>
 
-            <p>
-            We extend the PhysTwin paradigm by replacing the spring–mass prior with a continuum-based
-            Material Point Method (MPM). The key idea is to keep the same supervision signal—tracked 3D
-            motion from RGB-D observations—while upgrading the underlying dynamics model to a physically
-            richer continuum formulation.
-            </p>
+      <!-- Pipeline figure -->
+      <figure class="image mb-5">
+        <img
+          src="./media/figures/MPM-PhysTwin.png"
+          alt="Overview of the proposed MPM PhysTwin pipeline"
+          style="max-width: 50%; height: auto;"
+        />
+        <figcaption class="has-text-centered is-size-6 mt-2">
+          <strong>Figure.</strong> Overview of the proposed MPM PhysTwin pipeline.
+          Tracked 3D motion from RGB-D observations supervises a differentiable
+          MPM simulator, enabling end-to-end optimization of material parameters.
+        </figcaption>
+      </figure>
 
-            <p>
-            MPM offers three practical advantages for inverse modeling of deformable objects: it naturally
-            supports large deformations without relying on mesh connectivity, computes internal forces from
-            stress via a constitutive model, and enables optimization over physically meaningful parameters
-            such as Young’s modulus and density. Crucially, the simulator remains fully differentiable,
-            allowing gradients to flow from image- or trajectory-level losses back to material parameters.
-            </p>
+      <p>
+        We extend the PhysTwin paradigm by replacing the spring–mass prior with a
+        continuum-based Material Point Method (MPM). The key idea is to keep the
+        same supervision signal—tracked 3D motion from RGB-D observations—while
+        upgrading the underlying dynamics model to a physically richer continuum
+        formulation.
+      </p>
 
-            <p>
-            The result is an end-to-end pipeline that estimates spatial material properties from observed
-            motion while preserving physical interpretability and generalization to novel interactions.
-            </p>
-        </div>
+      <p>
+        MPM offers three practical advantages for inverse modeling of deformable
+        objects: it naturally supports large deformations without relying on mesh
+        connectivity, computes internal forces from stress via a constitutive model,
+        and enables optimization over physically meaningful parameters such as
+        Young’s modulus and density. Crucially, the simulator remains fully
+        differentiable, allowing gradients to flow from image- or trajectory-level
+        losses back to material parameters.
+      </p>
+
+      <p>
+        The result is an end-to-end pipeline that estimates spatial material
+        properties from observed motion while preserving physical interpretability
+        and generalization to novel interactions.
+      </p>
     </div>
+  </div>
 </section>
+
 
 
 <section class="section" id="mpm-phystwin">
