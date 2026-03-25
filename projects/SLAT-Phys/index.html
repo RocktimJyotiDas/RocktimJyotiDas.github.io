@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="SLAT-Phys: Fast Material Property Field Prediction from Structured 3D Latents">
+  <meta name="keywords" content="material property estimation, physics simulation, 3D generation, MPM, SLAT">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SLAT-Phys</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/slat-phys.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h1 class="title is-1 publication-title">
+            SLAT-Phys: Fast Material Property Field Prediction<br>from Structured 3D Latents
+          </h1>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://rocktimjyotidas.github.io/" target="_blank">Rocktim Jyoti Das</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.cs.umd.edu/~dmanocha/" target="_blank">Dinesh Manocha</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors mt-2">
+            <span class="author-block"><sup>1</sup>University of Maryland, College Park</span>
+          </div>
+
+          <div class="column has-text-centered mt-4">
+            <div class="publication-links">
+              <!-- PDF -->
+              <span class="link-block">
+                <a href="./media/paper/SLAT-Phys.pdf" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TEASER VIDEOS ===================== -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <p class="has-text-centered is-size-5 mb-4">
+        SLAT-Phys predicts spatially varying material fields from a <strong>single RGB image</strong>
+        and runs physics-based simulation &mdash; <strong>120&times; faster</strong> than prior methods.
+      </p>
+      <div class="columns is-multiline is-centered">
+        <div class="column is-4">
+          <div class="video-card">
+            <video autoplay muted loop playsinline>
+              <source src="./media/videos/flower_vase.mp4" type="video/mp4">
+            </video>
+            <p class="video-caption">Flower Vase</p>
+          </div>
+        </div>
+        <div class="column is-4">
+          <div class="video-card">
+            <video autoplay muted loop playsinline>
+              <source src="./media/videos/rubber_duck.mp4" type="video/mp4">
+            </video>
+            <p class="video-caption">Rubber Duck</p>
+          </div>
+        </div>
+        <div class="column is-4">
+          <div class="video-card">
+            <video autoplay muted loop playsinline>
+              <source src="./media/videos/snow man.mp4" type="video/mp4">
+            </video>
+            <p class="video-caption">Snow Man</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ABSTRACT ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Estimating material property fields of 3D assets is critical for physics-based simulation,
+            robotics, and digital twin generation. Existing vision-based approaches are either too expensive
+            and slow or rely on 3D information. We present <strong>SLAT-Phys</strong>, an end-to-end method
+            that predicts spatially varying material property fields of 3D assets directly from a single RGB
+            image without explicit 3D reconstruction.
+          </p>
+          <p>
+            Our approach leverages spatially organized latent features from a pretrained 3D asset generation
+            model (TRELLIS) that encode rich geometry and semantic priors, and trains a lightweight neural
+            decoder to estimate Young&rsquo;s modulus (<em>E</em>), density (&rho;), and Poisson&rsquo;s
+            ratio (&nu;). The coarse volumetric layout and semantic cues of the latent representation enable
+            accurate material estimation. SLAT-Phys requires only <strong>&sim;9.9 seconds</strong> per
+            object on an NVIDIA RTX A5000 GPU and avoids reconstruction and voxelization preprocessing,
+            resulting in a <strong>&sim;120&times; speedup</strong> compared to prior methods.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PIPELINE ===================== -->
+<section class="section" id="pipeline">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method</h2>
+    <div class="content has-text-justified">
+      <figure class="image mb-5">
+        <img src="./media/figures/Pipeline.png"
+             alt="SLAT-Phys pipeline overview"
+             style="max-width:100%; border-radius:8px;">
+        <figcaption class="has-text-centered is-size-6 mt-3">
+          <strong>Figure 1.</strong> Overview of SLAT-Phys. Given a single RGB image, the TRELLIS encoder
+          produces a Structured LATent (SLAT) representation. Two parallel decoders predict the 3DGS
+          geometry and spatially varying material properties (<em>E</em>, &rho;, &nu;) at each voxel.
+          The resulting geometry and material fields are passed to an MPM physics solver for simulation.
+        </figcaption>
+      </figure>
+
+      <h3 class="title is-4">How it works</h3>
+      <div class="columns is-multiline">
+        <div class="column is-6">
+          <div class="box step-box">
+            <p class="step-number">1</p>
+            <p class="step-title">SLAT Feature Extraction</p>
+            <p>A single RGB image is encoded by the frozen TRELLIS transformer into Structured LATent
+            (SLAT) features &mdash; sparse voxel coordinates with 8-dimensional latent vectors on a
+            64<sup>3</sup> grid.</p>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="box step-box">
+            <p class="step-number">2</p>
+            <p class="step-title">Physics Decoder</p>
+            <p>A lightweight sparse Swin-style transformer decoder maps SLAT features directly to
+            per-voxel material properties: Young&rsquo;s modulus, density, and Poisson&rsquo;s ratio,
+            plus a discrete material class label.</p>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="box step-box">
+            <p class="step-number">3</p>
+            <p class="step-title">Geometry Decoding</p>
+            <p>In parallel, the same SLAT representation is decoded into a 3D Gaussian Splatting (3DGS)
+            representation, providing simulation particles whose geometry and appearance faithfully
+            match the input image.</p>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="box step-box">
+            <p class="step-number">4</p>
+            <p class="step-title">MPM Physics Simulation</p>
+            <p>Material parameters are transferred to Gaussian particles via nearest-neighbor
+            interpolation and passed to an MPM solver to simulate physically plausible
+            deformation under external forces.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SIMULATION RESULTS ===================== -->
+<section class="section" id="results">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Simulation Results</h2>
+    <p class="has-text-centered mb-5">
+      Physics-based simulations of diverse objects using material properties predicted by SLAT-Phys.
+    </p>
+
+    <div class="columns is-multiline is-centered">
+      <div class="column is-4">
+        <div class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="./media/videos/flower.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Flower</p>
+        </div>
+      </div>
+      <div class="column is-4">
+        <div class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="./media/videos/flower_vase.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Flower Vase</p>
+        </div>
+      </div>
+      <div class="column is-4">
+        <div class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="./media/videos/rubber_duck.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Rubber Duck</p>
+        </div>
+      </div>
+      <div class="column is-4">
+        <div class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="./media/videos/rubber teddy.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Rubber Teddy</p>
+        </div>
+      </div>
+      <div class="column is-4">
+        <div class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="./media/videos/snow man.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption">Snow Man</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="has-text-centered is-size-6 mt-3" style="color:#555;">
+      The flower vase example (top right) illustrates spatially varying material fields:
+      the deformable leaves receive low stiffness while the rigid vase receives high Young&rsquo;s modulus.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== QUANTITATIVE RESULTS ===================== -->
+<section class="section" id="comparison">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Comparison with Prior Methods</h2>
+
+    <figure class="image mb-5">
+      <img src="./media/figures/results.png"
+           alt="Quantitative comparison with prior methods"
+           style="max-width:100%; border-radius:8px;">
+      <figcaption class="has-text-centered is-size-6 mt-3">
+        <strong>Table 1.</strong> (a) Runtime comparison: SLAT-Phys achieves &sim;9.9 s per object versus
+        &sim;20 min for NeRF2Physics and Pixie, a <strong>120&times; speedup</strong>.
+        (b) Material property prediction accuracy on the PixieVerse benchmark.
+      </figcaption>
+    </figure>
+
+    <!-- Summary callouts -->
+    <div class="columns is-centered mt-5">
+      <div class="column is-4 has-text-centered">
+        <div class="callout-box">
+          <p class="callout-number">9.9s</p>
+          <p class="callout-label">per object<br>(NVIDIA RTX A5000)</p>
+        </div>
+      </div>
+      <div class="column is-4 has-text-centered">
+        <div class="callout-box">
+          <p class="callout-number">120&times;</p>
+          <p class="callout-label">faster than<br>prior methods</p>
+        </div>
+      </div>
+      <div class="column is-4 has-text-centered">
+        <div class="callout-box">
+          <p class="callout-number">0&times;</p>
+          <p class="callout-label">3D reconstruction<br>required</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTRIBUTIONS ===================== -->
+<section class="section" id="contributions">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Key Contributions</h2>
+    <div class="content">
+      <ul class="contributions-list">
+        <li>
+          <strong>Single-image material field regression.</strong> The first approach to directly regress
+          continuous, spatially varying material property fields from a single RGB image without explicit
+          3D reconstruction or multi-view aggregation.
+        </li>
+        <li>
+          <strong>Physics-informative structured latents.</strong> We demonstrate that SLAT features
+          learned by large-scale 3D generation models encode physically meaningful information beyond
+          geometry, enabling accurate estimation of Young&rsquo;s modulus, density, and Poisson&rsquo;s ratio.
+        </li>
+        <li>
+          <strong>Simulation-ready digital twins at scale.</strong> SLAT-Phys enables faster
+          simulation-ready digital twin generation from a single image, achieving a &sim;120&times; speedup
+          compared to prior reconstruction-based pipelines while maintaining competitive prediction accuracy.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BIBTEX ===================== -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">BibTeX</h2>
+    <pre class="bibtex-block"><code>@article{das2025slatphys,
+  title     = {{SLAT-Phys}: Fast Material Property Field Prediction
+               from Structured {3D} Latents},
+  author    = {Das, Rocktim Jyoti and Manocha, Dinesh},
+  year      = {2025},
+  institution = {University of Maryland, College Park},
+}</code></pre>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            Website template adapted from
+            <a href="https://github.com/nerfies/nerfies.github.io" target="_blank">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

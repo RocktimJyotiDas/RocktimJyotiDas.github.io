@@ -1,0 +1,127 @@
+/* ---- Videos ---- */
+.video-card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+}
+
+.video-card video {
+  width: 100%;
+  display: block;
+  max-height: 280px;
+  object-fit: contain;
+  background: #f0f0f0;
+}
+
+.video-caption {
+  text-align: center;
+  padding: 8px 4px 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  background: #f0f0f0;
+  margin: 0;
+}
+
+/* ---- Step boxes ---- */
+.step-box {
+  position: relative;
+  padding-top: 1.8rem !important;
+  border-top: 3px solid #3273dc;
+}
+
+.step-number {
+  position: absolute;
+  top: -1px;
+  left: 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #3273dc;
+  text-transform: uppercase;
+}
+
+.step-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+/* ---- Callout stats ---- */
+.callout-box {
+  padding: 1.5rem 1rem;
+  border-radius: 12px;
+  background: #f5f5f5;
+}
+
+.callout-number {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #3273dc;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.callout-label {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* ---- Contributions list ---- */
+.contributions-list {
+  list-style: none;
+  padding: 0;
+}
+
+.contributions-list li {
+  padding: 0.9rem 1rem 0.9rem 1.2rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #3273dc;
+  background: #f9f9f9;
+  border-radius: 0 8px 8px 0;
+  line-height: 1.6;
+}
+
+/* ---- BibTeX ---- */
+.bibtex-block {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  border: 1px solid #ddd;
+}
+
+.bibtex-block code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: #333;
+}
+
+/* ---- Hero tweak ---- */
+.hero.teaser {
+  background: #f7f7f7;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+/* ---- Figures ---- */
+figcaption {
+  color: #555;
+  line-height: 1.5;
+}
+
+/* ---- Publication links spacing ---- */
+.publication-links .link-block {
+  margin: 0 6px;
+}
+
+/* ---- Author superscripts ---- */
+sup {
+  font-size: 0.7em;
+  vertical-align: super;
+}
