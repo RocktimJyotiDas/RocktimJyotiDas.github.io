@@ -38,7 +38,10 @@
 
           <div class="is-size-5 publication-authors">
             <span class="author-block">
-              <a href="https://rocktimjyotidas.github.io/" target="_blank">Rocktim Jyoti Das</a><sup>1</sup>,
+              <a href="https://rocktimjyotidas.github.io/" target="_blank">Rocktim Jyoti Das</a><sup>1*</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://hjhyunjinkim.github.io/" target="_blank">Hyunjin Kim</a><sup>1*</sup>,
             </span>
             <span class="author-block">
               <a href="https://www.cs.umd.edu/people/dmanocha" target="_blank">Dinesh Manocha</a><sup>1</sup>
@@ -48,15 +51,18 @@
           <div class="is-size-5 publication-authors mt-2">
             <span class="author-block"><sup>1</sup>University of Maryland, College Park</span>
           </div>
+          <div class="is-size-6 publication-authors">
+            <span class="author-block"><sup>*</sup>Equal contribution</span>
+          </div>
 
           <div class="column has-text-centered mt-4">
             <div class="publication-links">
-              <!-- PDF -->
+              <!-- Paper PDF -->
               <span class="link-block">
-                <a href="https://arxiv.org/abs/2603.23973" target="_blank"
+                <a href="./media/paper/SLAT-Phys.pdf" target="_blank"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                  <span>ArXiv</span>
+                  <span>Paper</span>
                 </a>
               </span>
             </div>
@@ -74,7 +80,7 @@
     <div class="hero-body">
       <p class="has-text-centered is-size-5 mb-4">
         SLAT-Phys predicts spatially varying material fields from a <strong>single RGB image</strong>
-        and runs physics-based simulation &mdash; <strong>120&times; faster</strong> than prior methods.
+        and runs physics-based simulation &mdash; <strong>up to 184&times; faster</strong> than prior methods.
       </p>
       <div class="columns is-multiline is-centered">
         <div class="column is-4">
@@ -114,20 +120,22 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Estimating material property fields of 3D assets is critical for physics-based simulation,
-            robotics, and digital twin generation. Existing vision-based approaches are either too expensive
-            and slow or rely on 3D information. We present <strong>SLAT-Phys</strong>, an end-to-end method
-            that predicts spatially varying material property fields of 3D assets directly from a single RGB
-            image without explicit 3D reconstruction.
+            Estimating spatially varying material properties from visual observations is important for
+            physics-based simulation and robotics, but existing approaches often require multi-view
+            observations, an existing 3D asset, or expensive per-object representation construction.
+            We present <strong>SLAT-Phys</strong>, a feedforward framework that predicts material property
+            fields from a single RGB image by reusing structured 3D latents from a pretrained image-to-3D
+            model. A lightweight sparse transformer operates directly on these latents to estimate
+            Young&rsquo;s modulus (<em>E</em>), density (&rho;), and Poisson&rsquo;s ratio (&nu;) without
+            constructing a separate 3D feature field.
           </p>
           <p>
-            Our approach leverages spatially organized latent features from a pretrained 3D asset generation
-            model (TRELLIS) that encode rich geometry and semantic priors, and trains a lightweight neural
-            decoder to estimate Young&rsquo;s modulus (<em>E</em>), density (&rho;), and Poisson&rsquo;s
-            ratio (&nu;). The coarse volumetric layout and semantic cues of the latent representation enable
-            accurate material estimation. SLAT-Phys requires only <strong>&sim;9.9 seconds</strong> per
-            object on an NVIDIA RTX A5000 GPU and avoids reconstruction and voxelization preprocessing,
-            resulting in a <strong>&sim;120&times; speedup</strong> compared to prior methods.
+            Under the Pixie evaluation protocol, SLAT-Phys outperforms prior methods on most reported
+            continuous-property metrics while remaining competitive in material classification. The complete
+            pipeline requires approximately <strong>9.9 seconds</strong> per object on an NVIDIA RTX A5000
+            GPU, <strong>up to 184&times; faster</strong> than prior methods. These results demonstrate that
+            pretrained structured 3D latents provide an effective and efficient representation for
+            single-image material-property prediction.
           </p>
         </div>
       </div>
@@ -141,14 +149,18 @@
     <h2 class="title is-3 has-text-centered">Method</h2>
     <div class="content has-text-justified">
       <figure class="image mb-5">
-        <img src="./media/figures/Pipeline.png"
+        <img src="./media/figures/pipeline_fig2.png"
              alt="SLAT-Phys pipeline overview"
              style="max-width:100%; border-radius:8px;">
         <figcaption class="has-text-centered is-size-6 mt-3">
-          <strong>Figure 1.</strong> Overview of SLAT-Phys. Given a single RGB image, the TRELLIS encoder
-          produces a Structured LATent (SLAT) representation. Two parallel decoders predict the 3DGS
-          geometry and spatially varying material properties (<em>E</em>, &rho;, &nu;) at each voxel.
-          The resulting geometry and material fields are passed to an MPM physics solver for simulation.
+          <strong>Figure 2.</strong> Overview of SLAT-Phys. Given a single image of a 3D asset, our
+          framework first encodes the image using the SAM-3D-Objects encoder to obtain a structured 3D
+          latent (SLAT) representation. From this latent, two decoders predict the corresponding 3D Gaussian
+          Splatting (3DGS) representation and spatially varying material properties (<em>E</em>, &rho;, &nu;)
+          at each <em>surface</em> voxel. These surface predictions are extrapolated to the object&rsquo;s
+          full volume following PhysGaussian&rsquo;s internal-filling procedure, and the resulting volumetric
+          material field, together with the decoded Gaussians, is passed to an MPM solver for
+          physics-based simulation.
         </figcaption>
       </figure>
 
@@ -158,36 +170,35 @@
           <div class="box step-box">
             <p class="step-number">1</p>
             <p class="step-title">SLAT Feature Extraction</p>
-            <p>A single RGB image is encoded by the frozen TRELLIS transformer into Structured LATent
-            (SLAT) features &mdash; sparse voxel coordinates with 8-dimensional latent vectors on a
-            64<sup>3</sup> grid.</p>
+            <p>A single RGB image is encoded by the frozen SAM-3D-Objects image-to-3D model into
+            Structured LATent (SLAT) features &mdash; sparse occupied surface-voxel coordinates with
+            8-dimensional latent vectors on a 64<sup>3</sup> grid.</p>
           </div>
         </div>
         <div class="column is-6">
           <div class="box step-box">
             <p class="step-number">2</p>
             <p class="step-title">Physics Decoder</p>
-            <p>A lightweight sparse Swin-style transformer decoder maps SLAT features directly to
-            per-voxel material properties: Young&rsquo;s modulus, density, and Poisson&rsquo;s ratio,
-            plus a discrete material class label.</p>
+            <p>A lightweight sparse Swin-style transformer (256 channels, 8 blocks, 16 heads) maps SLAT
+            features directly to per-voxel Young&rsquo;s modulus, density, and Poisson&rsquo;s ratio,
+            plus one of eight material classes &mdash; no separate 3D feature field is constructed.</p>
           </div>
         </div>
         <div class="column is-6">
           <div class="box step-box">
             <p class="step-number">3</p>
-            <p class="step-title">Geometry Decoding</p>
-            <p>In parallel, the same SLAT representation is decoded into a 3D Gaussian Splatting (3DGS)
-            representation, providing simulation particles whose geometry and appearance faithfully
-            match the input image.</p>
+            <p class="step-title">Surface-to-Volume Extrapolation</p>
+            <p>The same SLAT is decoded into 3D Gaussians. Following PhysGaussian&rsquo;s internal filling,
+            interior voxels are found by ray-parity tests and inherit the material parameters of their
+            nearest predicted surface voxel, yielding a dense volumetric material field.</p>
           </div>
         </div>
         <div class="column is-6">
           <div class="box step-box">
             <p class="step-number">4</p>
             <p class="step-title">MPM Physics Simulation</p>
-            <p>Material parameters are transferred to Gaussian particles via nearest-neighbor
-            interpolation and passed to an MPM solver to simulate physically plausible
-            deformation under external forces.</p>
+            <p>The volumetric material field and decoded Gaussian geometry are passed to a Material Point
+            Method (MPM) solver to simulate physically plausible deformation under external forces.</p>
           </div>
         </div>
       </div>
@@ -253,40 +264,260 @@
   </div>
 </section>
 
-<!-- ===================== QUANTITATIVE RESULTS ===================== -->
+<!-- ===================== REAL-WORLD QUALITATIVE (Fig. 3) ===================== -->
+<section class="section" id="real-world">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Simulation from Real-World Images</h2>
+    <figure class="image mb-5">
+      <img src="./media/figures/real_sim_fig3.png"
+           alt="Qualitative simulation results from real-world object images"
+           style="max-width:100%; border-radius:8px;">
+      <figcaption class="has-text-centered is-size-6 mt-3">
+        <strong>Figure 3.</strong> Qualitative simulation results from real-world object images. From a single
+        RGB image, SLAT-Phys predicts spatially varying <em>E</em>, &nu;, and &rho;, which are combined with
+        geometry decoded from the same structured latent for MPM simulation. The flower bends under wind while
+        its base stays comparatively rigid, the rubber duck deforms while falling, and the snowman&rsquo;s body
+        deforms and separates on impact while its stick arms remain rigid.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== QUANTITATIVE RESULTS (Table 1) ===================== -->
 <section class="section" id="comparison">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered">Comparison with Prior Methods</h2>
-
-    <figure class="image mb-5">
-      <img src="./media/figures/results.png"
-           alt="Quantitative comparison with prior methods"
-           style="max-width:100%; border-radius:8px;">
-      <figcaption class="has-text-centered is-size-6 mt-3">
-        <strong>Table 1.</strong> (a) Runtime comparison: SLAT-Phys achieves &sim;9.9 s per object versus
-        &sim;20 min for NeRF2Physics and Pixie, a <strong>120&times; speedup</strong>.
-        (b) Material property prediction accuracy on the PixieVerse benchmark.
-      </figcaption>
-    </figure>
+    <p class="has-text-centered mb-5">
+      Evaluated under the PixieVerse protocol, with all baselines run on the same NVIDIA RTX A5000 GPU.
+    </p>
 
     <!-- Summary callouts -->
-    <div class="columns is-centered mt-5">
+    <div class="columns is-centered mb-5">
       <div class="column is-4 has-text-centered">
         <div class="callout-box">
           <p class="callout-number">9.9s</p>
-          <p class="callout-label">per object<br>(NVIDIA RTX A5000)</p>
+          <p class="callout-label">per object, end to end<br>(NVIDIA RTX A5000)</p>
         </div>
       </div>
       <div class="column is-4 has-text-centered">
         <div class="callout-box">
-          <p class="callout-number">120&times;</p>
-          <p class="callout-label">faster than<br>prior methods</p>
+          <p class="callout-number">184&times;</p>
+          <p class="callout-label">faster than PUGS;<br>121&ndash;128&times; vs. NeRF2Physics / Pixie</p>
         </div>
       </div>
       <div class="column is-4 has-text-centered">
         <div class="callout-box">
-          <p class="callout-number">No</p>
-          <p class="callout-label">per-object reconstruction<br>preprocessing</p>
+          <p class="callout-number">48%</p>
+          <p class="callout-label">lower average continuous MSE<br>than Pixie (0.053 vs. 0.102)</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="title is-5 mt-5">(a) Material property prediction</h3>
+    <div class="table-wrap">
+      <table class="table is-fullwidth is-hoverable results-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Input</th>
+            <th>Mat. Acc. &uarr;</th>
+            <th>Avg. Cont. MSE &darr;</th>
+            <th>log <em>E</em> err &darr;</th>
+            <th>&nu; err &darr;</th>
+            <th>log &rho; err &darr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>NeRF2Physics</td><td>Multi-view / 3D mesh</td>
+            <td>0.274 &plusmn; 0.01</td><td>0.858 &plusmn; 0.109</td><td>1.115 &plusmn; 0.165</td>
+            <td>0.462 &plusmn; 0.106</td><td>0.997 &plusmn; 0.162</td>
+          </tr>
+          <tr>
+            <td>PUGS</td><td>Multi-view / 3D mesh</td>
+            <td>&mdash;</td><td>&mdash;</td><td>1.0591 &plusmn; 0.60</td><td>&mdash;</td><td>0.2335 &plusmn; 0.36</td>
+          </tr>
+          <tr>
+            <td>VoMP</td><td>3D mesh</td>
+            <td>&mdash;</td><td>&mdash;</td><td>3.7203 &plusmn; 0.1101</td>
+            <td><strong>0.0411 &plusmn; 0.0028</strong></td><td>0.5460 &plusmn; 0.0283</td>
+          </tr>
+          <tr>
+            <td>Pixie</td><td>Multi-view / 3D mesh</td>
+            <td><strong>0.9158 &plusmn; 0.026</strong></td><td>0.1024 &plusmn; 0.0098</td><td>0.0641 &plusmn; 0.0070</td>
+            <td>0.1491 &plusmn; 0.0182</td><td>0.0940 &plusmn; 0.0111</td>
+          </tr>
+          <tr class="ours-row">
+            <td>SLAT-Phys (Ours)</td><td>Single image</td>
+            <td>0.9014 &plusmn; 0.030</td><td><strong>0.0534 &plusmn; 0.0071</strong></td>
+            <td><strong>0.0263 &plusmn; 0.0047</strong></td><td>0.0849 &plusmn; 0.0138</td>
+            <td><strong>0.0490 &plusmn; 0.0074</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">
+      MSE is computed in normalized space (log <em>E</em>, log &rho;, &nu; scaled to [&minus;1, 1]) with the
+      official Pixie evaluation code; &plusmn; is the standard error over test objects. SLAT-Phys uses only a
+      single RGB image, whereas every baseline needs multi-view observations or an existing 3D asset.
+    </p>
+
+    <h3 class="title is-5 mt-6">(b) End-to-end runtime per object</h3>
+    <div class="table-wrap">
+      <table class="table is-fullwidth is-hoverable results-table runtime-table">
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>NeRF2Physics</th>
+            <th>PUGS</th>
+            <th>VoMP</th>
+            <th>Pixie</th>
+            <th class="ours-col">SLAT-Phys</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Preprocessing</td>
+            <td>Blender rendering: &sim;65 s</td>
+            <td>Blender rendering: &sim;65 s</td>
+            <td>Blender rendering (150 views): 154.85 s</td>
+            <td>Blender rendering: &sim;65 s</td>
+            <td class="ours-col">Image preprocessing + DINO encoding: 0.138 s</td>
+          </tr>
+          <tr>
+            <td>Representation construction</td>
+            <td>NeRF training: 1020 s</td>
+            <td>3DGS training + SAM + scale + contrastive feature: 1630.05 s</td>
+            <td>Mesh voxelization: 0.59 s</td>
+            <td>F3RM training: 575.3 s</td>
+            <td class="ours-col">Sparse structure sampling: 4.69 s</td>
+          </tr>
+          <tr>
+            <td>Feature extraction</td>
+            <td>CLIP feature fusion: 96.8 s</td>
+            <td>CLIP feature fusion: 156.82 s</td>
+            <td>DINO feature extraction: 26.26 s</td>
+            <td>F3RM rendering + voxelization: 606.6 s</td>
+            <td class="ours-col">SLAT feature sampling: 5.03 s</td>
+          </tr>
+          <tr>
+            <td>Material decoding</td>
+            <td>Captioning + LLM proposal + property prediction: 14 s</td>
+            <td>LLM proposal + property prediction: 31.10 s</td>
+            <td>Geometry transformer + MatVAE decode: 2.88 s</td>
+            <td>Neural inference: 14.1 s</td>
+            <td class="ours-col">Material property decoder: 0.004 s</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total per object</td>
+            <td>&sim;1196 s</td><td>&sim;1818 s</td><td>&sim;184.6 s</td><td>&sim;1261 s</td>
+            <td class="ours-col"><strong>&sim;9.9 s</strong></td>
+          </tr>
+          <tr class="total-row">
+            <td>Speedup vs. ours</td>
+            <td>121&times;</td><td>183.6&times;</td><td>18.6&times;</td><td>128&times;</td>
+            <td class="ours-col">1&times;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">
+      <strong>Table 1.</strong> Comparison with prior methods. SLAT-Phys is 121&ndash;184&times; faster than
+      the optimization-based baselines and 18.6&times; faster than VoMP. Most of its time is spent obtaining
+      the structured latent; the material decoder itself takes only 4 ms.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== ABLATIONS (Tables 2 & 3) ===================== -->
+<section class="section" id="ablations">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Ablation Studies</h2>
+    <div class="columns">
+      <div class="column is-6">
+        <h3 class="title is-5">Decoder capacity</h3>
+        <div class="table-wrap">
+          <table class="table is-fullwidth is-hoverable results-table">
+            <thead>
+              <tr><th>Model</th><th>Params</th><th>log <em>E</em> &darr;</th><th>log &rho; &darr;</th><th>&nu; &darr;</th><th>Mat. Acc. &uarr;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Small</td><td>0.20M</td><td>0.0348</td><td>0.0624</td><td>0.0883</td><td>0.8757</td></tr>
+              <tr><td>Medium</td><td>1.19M</td><td>0.0295</td><td>0.0509</td><td>0.0851</td><td>0.8948</td></tr>
+              <tr class="ours-row"><td>Large</td><td>6.32M</td><td><strong>0.0263</strong></td><td><strong>0.0490</strong></td><td><strong>0.0849</strong></td><td><strong>0.9014</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">
+          <strong>Table 2.</strong> Small: 64 channels, 4 blocks, 4 heads. Medium: 128 / 6 / 8.
+          Large: 256 / 8 / 16. All use the same SLAT input and training data; more capacity consistently helps.
+        </p>
+      </div>
+      <div class="column is-6">
+        <h3 class="title is-5">Pretrained 3D backbone</h3>
+        <div class="table-wrap">
+          <table class="table is-fullwidth is-hoverable results-table">
+            <thead>
+              <tr><th>Backbone</th><th>log <em>E</em> &darr;</th><th>log &rho; &darr;</th><th>&nu; &darr;</th><th>Mat. Acc. &uarr;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>TRELLIS</td><td>0.0408</td><td>0.0719</td><td>0.0919</td><td>0.8826</td></tr>
+              <tr class="ours-row"><td>SAM-3D</td><td><strong>0.0263</strong></td><td><strong>0.0490</strong></td><td><strong>0.0849</strong></td><td><strong>0.9014</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">
+          <strong>Table 3.</strong> Structured latents from TRELLIS vs. SAM-3D-Objects, with the decoder,
+          data and optimization fixed. Prediction quality depends on the pretrained representation, not just
+          decoder capacity.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== REAL2SIM ROBOTICS (Fig. 4) ===================== -->
+<section class="section" id="real2sim">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Real2Sim Robotic Evaluation</h2>
+    <div class="content has-text-justified">
+      <p>
+        From one top-down scene image, each object is reconstructed with SAM-3D-Objects and annotated by
+        SLAT-Phys, then recreated in Isaac Sim, where a UR3e robot with a Robotiq Hand-E gripper squeezes and
+        weighs it. We compare against a reference simulation that uses ground-truth meshes, poses, masses and
+        (<em>E</em>, &nu;), across three tasks of 10 scenes each.
+      </p>
+    </div>
+    <figure class="image mb-5">
+      <img src="./media/figures/real2sim_fig4.png"
+           alt="Real2Sim robotic evaluation with SLAT-Phys"
+           style="max-width:100%; border-radius:8px;">
+      <figcaption class="has-text-centered is-size-6 mt-3">
+        <strong>Figure 4.</strong> <em>Top:</em> input image (a), predicted Young&rsquo;s modulus (b) and
+        density (c), the recreated Isaac Sim scene (d), and the robot squeezing (e) and weighing (f) objects.
+        <em>Bottom:</em> reference assets (orange) vs. SLAT-Phys predictions from a single image (blue):
+        (g) wrist loads, (h) squeeze compression for soft toys and rigid cases (black bars are medians), and
+        (i) task success.
+      </figcaption>
+    </figure>
+
+    <div class="columns is-centered">
+      <div class="column is-4 has-text-centered">
+        <div class="callout-box">
+          <p class="callout-number">0.87</p>
+          <p class="callout-label">Spearman correlation of wrist<br>loads with reference (65 objects)</p>
+        </div>
+      </div>
+      <div class="column is-4 has-text-centered">
+        <div class="callout-box">
+          <p class="callout-number">7.3 mm</p>
+          <p class="callout-label">median soft-object compression<br>(reference: 10.1 mm)</p>
+        </div>
+      </div>
+      <div class="column is-4 has-text-centered">
+        <div class="callout-box">
+          <p class="callout-number">10 / 9 / 6</p>
+          <p class="callout-label">of 10 scenes solved: soft vs. rigid /<br>heavier / sort by weight</p>
         </div>
       </div>
     </div>
@@ -300,19 +531,18 @@
     <div class="content">
       <ul class="contributions-list">
         <li>
-          <strong>Single-image material field regression.</strong> The first approach to directly regress
-          continuous, spatially varying material property fields from a single RGB image without explicit
-          3D reconstruction or multi-view aggregation.
+          <strong>Feedforward material fields from one image.</strong> SLAT-Phys predicts continuous,
+          spatially varying material property fields from a single image by operating directly on structured
+          3D latents, with no multi-view capture, existing 3D asset, or per-object feature field.
         </li>
         <li>
-          <strong>Physics-informative structured latents.</strong> We demonstrate that SLAT features
-          learned by large-scale 3D generation models encode physically meaningful information beyond
-          geometry, enabling accurate estimation of Young&rsquo;s modulus, density, and Poisson&rsquo;s ratio.
+          <strong>Structured latents are physics-informative.</strong> Spatially organized SLAT features let a
+          lightweight decoder estimate Young&rsquo;s modulus, density, and Poisson&rsquo;s ratio accurately.
         </li>
         <li>
-          <strong>Simulation-ready digital twins at scale.</strong> SLAT-Phys enables faster
-          simulation-ready digital twin generation from a single image, achieving a &sim;120&times; speedup
-          compared to prior reconstruction-based pipelines while maintaining competitive prediction accuracy.
+          <strong>Accurate, fast, and useful downstream.</strong> SLAT-Phys beats reconstruction-based methods
+          on most continuous-property metrics with up to 184&times; faster inference, and provides physics
+          annotations for downstream robotic simulation.
         </li>
       </ul>
     </div>
@@ -326,7 +556,7 @@
     <pre class="bibtex-block"><code>@article{das2026slatphys,
   title     = {{SLAT-Phys}: Fast Material Property Field Prediction
                from Structured {3D} Latents},
-  author    = {Das, Rocktim Jyoti and Manocha, Dinesh},
+  author    = {Das, Rocktim Jyoti and Kim, Hyunjin and Manocha, Dinesh},
   year      = {2026},
   institution = {University of Maryland, College Park},
 }</code></pre>
